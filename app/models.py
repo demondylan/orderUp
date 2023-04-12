@@ -1,9 +1,38 @@
 from flask_login import UserMixin, current_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.types import Integer, String
 
 
 db = SQLAlchemy()
+
+class Menu(db.Model, UserMixin):
+    __tablename__ = "menus"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    items = relationship("MenuItem", back_populates="menu")
+
+class MenuItem(db.Model, UserMixin):
+    __tablename__ = "menu_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    menu_id = db.Column(db.Integer, ForeignKey("menus.id"), nullable=False)
+    menu_type_id = db.Column(db.Integer, ForeignKey("menu_item_types.id"), nullable=False)
+    type = relationship("MenuItemType", back_populates="menu_items")
+    menu = relationship("Menu", back_populates="items")
+
+class MenuItemType(db.Model, UserMixin):
+    __tablename__ = "menu_item_types"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    menu_items = relationship("MenuItem", back_populates="type")
 
 class Employee(db.Model, UserMixin):
     __tablename__ = "employees"
